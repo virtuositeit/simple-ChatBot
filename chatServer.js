@@ -28,22 +28,36 @@ http.listen(serverPort, function() {
 io.on('connect', function(socket) {
   console.log('a new user connected');
   var questionNum = 0; // keep count of question, used for IF condition.
+
+  var sentences = ["One of the most ", 
+	           " things about graduating is that my parents are ", 
+	           " a huge party! I decided to have a backyard barbecue for all my family and ",
+	           ". I've invited my best friend ", 
+	           ", and of course my teacher Mrs. ", 
+	           ". My dad is going to ", 
+	           " hamburgers on his shiny new grill, and mom is going to make her famous ", 
+	           " salad. After we finish partying, we can go swimming in our new pool. ", 
+	           "!"];
+  var essay = [];
+
   socket.on('loaded', function(){// we wait until the client has loaded and contacted us that it is ready to go.
 
-  socket.emit('answer',"Hey, Hello I am \"___*-\" a simple chat bot example."); //We start with the introduction;
-  setTimeout(timedQuestion, 2500, socket,"What is your Name?"); // Wait a moment and respond with a question.
+  socket.emit('answer',"Hey, welcome to Mad Libs! Let's create a story today."); //We start with the introduction;
+  setTimeout(timedQuestion, 2000, socket,"First, can you enter an adjective?"); // Wait a moment and respond with a question.
 
 });
   socket.on('message', (data)=>{ // If we get a new message from the client we process it;
         console.log(data);
-        questionNum= bot(data,socket,questionNum);	// run the bot function with the new message
+	essay.push(sentences[questionNum]);
+	essay.push(data)
+        questionNum= bot(data,socket,questionNum,essay,sentences);	// run the bot function with the new message
       });
   socket.on('disconnect', function() { // This function  gets called when the browser window gets closed
     console.log('user disconnected');
   });
 });
 //--------------------------CHAT BOT FUNCTION-------------------------------//
-function bot(data,socket,questionNum) {
+function bot(data,socket,questionNum,essay,sentences) {
   var input = data; // This is generally really terrible from a security point of view ToDo avoid code injection
   var answer;
   var question;
@@ -51,50 +65,45 @@ function bot(data,socket,questionNum) {
 
 /// These are the main statments that make up the conversation.
   if (questionNum == 0) {
-  answer= 'Hello ' + input + ' :-)';// output response
-  waitTime =2000;
-  question = 'How old are you?';			    	// load next question
+  answer= 'Noted!'; // output response
+  waitTime = 800;
+  question = 'Next, please provide a verb ending in "ing":';			    	// load next question
   }
   else if (questionNum == 1) {
-  answer= 'Really ' + input + ' Years old? So that means you where born in: ' + (2018-parseInt(input));// output response
-  waitTime =2000;
-  question = 'Where do you live?';			    	// load next question
+  answer= 'Gotcha!';
+  waitTime = 800;
+  question = 'Now, please think of a plural noun:';			    	// load next question
   }
   else if (questionNum == 2) {
-  answer= ' Cool! I have never been to ' + input+'.';
-  waitTime =2000;
-  question = 'Whats your favorite Color?';			    	// load next question
+  answer= 'Input recorded!';
+  waitTime = 800;
+  question = 'This time, please enter the name of a celebrity:';			    	// load next question
   }
   else if (questionNum == 3) {
-  answer= 'Ok, ' + input+' it is.';
-  socket.emit('changeBG',input.toLowerCase());
-  waitTime = 2000;
-  question = 'Can you still read the font?';			    	// load next question
+  answer= 'Nice, ' + input + ' is on the list!';
+  waitTime = 800;
+  question = 'Okey now, you will think of a silly word....';
   }
   else if (questionNum == 4) {
-    if(input.toLowerCase()==='yes'|| input===1){
-      answer = 'Perfect!';
-      waitTime =2000;
-      question = 'Whats your favorite place?';
-    }
-    else if(input.toLowerCase()==='no'|| input===0){
-        socket.emit('changeFont','white'); /// we really should look up the inverse of what we said befor.
-        answer=''
-        question='How about now?';
-        waitTime =0;
-        questionNum--; // Here we go back in the question number this can end up in a loop
-    }else{
-      answer=' I did not understand you. Can you please answer with simply with yes or no.'
-      question='';
-      questionNum--;
-      waitTime =0;
-    }
-  // load next question
+  answer= 'Haha, that was funny!';
+  waitTime = 800;
+  question = 'Next, will you enter another verb?';
   }
-  else{
-    answer= 'I have nothing more to say!';// output response
-    waitTime =0;
-    question = '';
+  else if (questionNum == 5) {
+  answer= 'Cool!';
+  waitTime = 800;
+  question = 'We\'re almost there. Can you think of something alive this time? (animals, insects, plants, aliens, etc.):';
+  }
+  else if (questionNum == 6) {
+  answer= 'Wow! I would not have thought of that ;-)';
+  waitTime = 800;
+  question = 'One last request from me: I want you to enter another silly word. The sillier the better!';
+  }
+  else if (questionNum == 7) {
+  essay.push(sentences[questionNum + 1]);
+  answer= essay.join('');// output response
+  waitTime =0;
+  question = '';
   }
 
 
